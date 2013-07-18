@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="../loop.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        loop(function(fn, time, linker){
+            console.log(5);
+            linker.count += 5;
+            return linker.count < 20
+        }, 10, {count: 0});
+    </script>
+</body>
+</html>
