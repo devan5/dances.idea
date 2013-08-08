@@ -1,47 +1,3 @@
-// $log
-window._log = window.$log = (function(){
-	var
-		$log,
-		$$log,
-		logRepo = {}
-	;
-
-	$log = Boolean;
-
-	if(window.console && window.console.log){
-		$log = console.log;
-
-		try{
-			$log("_____" + (new Date).toString() + "_____");
-
-		}catch(e){
-			$log = null;
-		}
-
-		$log || ($log = function(){ console.log.apply(console, arguments); }) && $log("_____" + (new Date).toString() + "_____");
-
-		$$log = function(msg, method){
-			method = method || "log";
-
-			logRepo[method] || (logRepo[method] = console[method] ? console[method] : console.log);
-
-			"function" === typeof console[method] ?
-				logRepo[method].call(console, msg) :
-				logRepo[method](msg)
-			;
-
-		};
-
-		window.$$log || (window.$$log = $$log);
-		window.__log || (window.__log = $$log);
-
-	}else{
-		window.$$log = function(){return Array.prototype.slice.call(arguments, 0).join(", ")};
-	}
-
-	return $log;
-})();
-
 (function(exports){
     var
         Model,
@@ -68,9 +24,16 @@ window._log = window.$log = (function(){
 
                 return new Foo();
             }
-        })()
-    ;
+        })(),
 
+        fMixin = function(oFrom, oTarget){
+            for(var prop in oFrom){
+                if(oFrom.hasOwnProperty(prop)){
+                    oTarget[prop] = oFrom[prop];
+                }
+            }
+        }
+    ;
 
 	Model = {
 
@@ -87,7 +50,7 @@ window._log = window.$log = (function(){
 
             model.prototype = create(this.prototype);
 
-            "function" === typeof opts._construct && (this._construct = opts._construct);
+            "function" === typeof opts._construct && (model._construct = opts._construct);
 
             return model;
         },
@@ -105,30 +68,36 @@ window._log = window.$log = (function(){
 
 		/**
 		 * 扩展模型的实例
-		 * @param {Object | String} os
-		 * @param {Function} [fn]
+             * @param {Object | String} oos
+             * @param {Function | *} [fn]
 		 */
-		extend: function(os, fn){
+        extend: function(oos, fn){
             if(this === Model){
                 return this;
             }
 
-            this[os] = fn;
+                "[object Object]" === toString(oos) ?
+                    fMixin(oos, this) :
+                    (this[oos] = fn)
+                ;
 
             return this;
         },
 
         /**
          * 扩展模型的实例 prototype
-         * @param {Object | String} os
-         * @param {Function} [fn]
+             * @param {Object | String} oos
+             * @param {Function | *} [fn]
          */
-        implement: function(os, fn){
+        implement: function(oos, fn){
             if(this === Model){
                 return this;
             }
 
-            this.prototype[os] = fn;
+                "[object Object]" === toString(oos) ?
+                    fMixin(oos, this.prototype) :
+                    (this.prototype[oos] = fn)
+                ;
 
             return this
         },
